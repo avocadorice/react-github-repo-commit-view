@@ -5,7 +5,9 @@
   "private": true,
   "dependencies": {
     "react": "^16.8.6",
+    "react-diff-view": "^2.1.2",
     "react-dom": "^16.8.6",
+    "react-frame-component": "^4.1.0",
     "react-scripts": "2.1.8"
   },
   "scripts": {
