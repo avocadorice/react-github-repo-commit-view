@@ -1,0 +1,37 @@
+From ed073e2b4900db3cf556ffcd04b36d60122ac6f9 Mon Sep 17 00:00:00 2001
+From: Zan Thrash <zanthrash@gmail.com>
+Date: Mon, 25 Apr 2016 14:26:41 -0700
+Subject: [PATCH] removes Fast Property caching so app can start up.
+
+The fast property endpoint is no longer valid and was throwing an exception that was preventing the app from starting up.
+Since we do not use any of the Fast Property methods that reliy on this cache we are just loading it with empty lists.
+---
+ .../com/netflix/asgard/FastPropertyService.groovy        | 9 +++++++--
+ 1 file changed, 7 insertions(+), 2 deletions(-)
+
+diff --git a/grails-app/services/com/netflix/asgard/FastPropertyService.groovy b/grails-app/services/com/netflix/asgard/FastPropertyService.groovy
+index 9ca9fb81..0bc85ac3 100644
+--- a/grails-app/services/com/netflix/asgard/FastPropertyService.groovy
++++ b/grails-app/services/com/netflix/asgard/FastPropertyService.groovy
+@@ -57,7 +57,12 @@ class FastPropertyService implements CacheInitializer {
+                     FastProperty.fromXml(fastPropertyData)
+                 }
+             } else {
+-                throw new ServerException("Failure to fetch fast property list from ${url}")
++                // throw new ServerException("Failure to fetch fast property list from ${url}")
++                // This API call no longer works and prevents the app from starting up properly.
++                // CRUD operations for fast pproperties are not used so we are just going to log the error and return an
++                // empty list to the cache.
++                log.warn("Failure to fetch fast property list from ${url}")
++                return []
+             }
+         }
+         []
+@@ -255,6 +260,6 @@ class FastPropertyService implements CacheInitializer {
+     private String platformServiceHostAndPort(UserContext userContext) {
+         String host = configService.getRegionalPlatformServiceServer(userContext.region)
+         String port = configService.platformServicePort
+-        (configService.online && host && port) ? "${host}:${port}" : null
++        ((configService.online || true) && host && port) ? "${host}:${port}" : null
+     }
+ }

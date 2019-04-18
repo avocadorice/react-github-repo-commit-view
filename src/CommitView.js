@@ -1,66 +1,87 @@
 import React, { Component } from 'react'
 
 class CommitView extends Component {
-  /*
   constructor(props) {
     super(props)
 
     this.initialState = {
-      repo: this.props.repo,
-      commits: ''
+      org: '',
+      repoName: '',
+      repoCommits: []
     }
 
     this.state = this.initialState
-  }
 
-  componentDidMount() {
-    console.log("CommitView componentDidMount")
-
-    this.fetchCommits()
-  }
-
-  fetchCommits() {
-    const { repo } = this.props
-
-    if(repo) {
-      const url =
-        'https://api.github.com/repos/Netflix/' + repo + '/commits';
-
-      fetch(url)
-        .then(result => result.json())
-        .then(commits => {
-          this.setState({
-            commits: commits
-          })
-      })
+    // Hard coded repo commits to avoid exceeding rate limit
+    this.mockData = {
+      repoCommits:[{
+        "sha": "648102625a4b6d2c3669b7837c2a5768c20b16a3",
+        "commit": {
+          "message": "Update OSSMETADATA\n\nAsgard is unused at Netflix",
+        }
+      },
+      {
+        "sha": "825ff569410dd063755873a37326513f807f914b",
+        "commit": {
+          "message": "Merge pull request #723 from zanthrash/fix_fp_cache\n\nremoves Fast Property caching so app can start up.",
+        }
+      }]
     }
   }
-  */
 
-  handleClick(repoName) {
+  componentDidUpdate(prevProps) {
+    if (this.props.repoName !== prevProps.repoName) {
+      if(this.props.repoName) {
+        console.log("Load commits...")
+
+        if(process.env.REACT_APP_USE_GITHUB_API === "true") {
+          const { org, repoName } = this.props
+
+          const url =
+            'https://api.github.com/repos/' + org + '/' + repoName + '/commits';
+
+
+          fetch(url)
+            .then(result => result.json())
+            .then(commits => {
+              this.setState({
+                repoCommits: commits
+              })
+            })
+        }
+        else {
+          this.setState(this.mockData)
+        }
+      }
+      else {
+        // clear the view
+        this.setState(this.initialState)
+      }
+    }
+  }
+
+  handleClick(event, entry) {
+    this.props.updateDiffView(entry.sha)
   }
 
   render() {
-    console.log("CommitView render")
-    const { repoCommitsData } = this.props
+    const { repoCommits } = this.state
 
-    console.log(repoCommitsData)
-
-    if (repoCommitsData) {
-      const commits = repoCommitsData
+    if (repoCommits && repoCommits.length > 0) {
+      const commits = repoCommits
         .map((entry, index) => {
-          return <li key={index} onClick={(e) => this.handleClick(entry.name, e)}>{entry}</li>
+          return <li key={index} onClick={(e) => this.handleClick(e, entry)}>{entry.commit.message}</li>
       })
 
       return (
         <div>
-          Commits
+          <h3>Commits</h3>
           <ul>{commits}</ul>
         </div>
       )
     }
 
-    return <div>Loading...</div>;
+    return null
   }
 }
 

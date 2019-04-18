@@ -1,7 +1,7 @@
 {
-  "name": "react-tutorial",
+  "name": "react-github-repo-commit-view",
   "version": "0.1.0",
-  "homepage": "https://bhsiao123.github.io/react-tutorial",
+  "homepage": "https://bhsiao123.github.io/react-github-repo-commit-view",
   "private": true,
   "dependencies": {
     "react": "^16.8.6",
